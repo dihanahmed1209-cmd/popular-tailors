@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>পপুলার টেইলার্স এন্ড ফেব্রিক্স - বিজনেস ম্যানেজমেন্ট</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    <style>
+        :root { --primary: #1a1a2e; --accent: #ffd700; --bg: #f8f9fa; --card-bg: #ffffff; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background: var(--bg); color: #333; }
+        
+        /* প্রফেশনাল হেডার */
+        header { background: var(--primary); color: var(--accent); padding: 25px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border-bottom: 4px solid var(--accent); }
+        
+        .container { max-width: 1000px; margin: auto; padding: 20px; }
+
+        /* স্ট্যাটাস কার্ড */
+        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: white; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-left: 5px solid var(--primary); }
+
+        .tabs { display: flex; justify-content: center; margin-bottom: 25px; gap: 10px; }
+        .tab-btn { padding: 12px 25px; border: none; border-radius: 50px; cursor: pointer; font-weight: bold; background: #e0e0e0; transition: 0.3s; }
+        .tab-btn.active { background: var(--primary); color: var(--accent); transform: scale(1.05); }
+
+        .content-section { display: none; animation: fadeIn 0.5s ease; }
+        .content-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* প্রোডাক্ট ডিজাইন */
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+        .product-card { background: var(--card-bg); border-radius: 15px; overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.06); transition: 0.3s; }
+        .product-card:hover { transform: translateY(-10px); }
+        .product-img { width: 100%; height: 200px; object-fit: cover; border-bottom: 2px solid #eee; }
+        .product-info { padding: 15px; }
+        .price-tag { font-size: 22px; color: #2c3e50; font-weight: bold; display: block; margin: 10px 0; }
+
+        /* বাটন স্টাইল */
+        .btn { padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s; }
+        .btn-order { background: #25D366; color: white; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-admin { background: var(--primary); color: var(--accent); }
+
+        /* টেবিল স্টাইল */
+        .admin-card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #fdfdfd; color: var(--primary); }
+
+        /* মডাল */
+        #orderModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal-body { background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 500px; }
+
+        input, select, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #eee; border-radius: 10px; font-size: 16px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1><i class="fas fa-cut"></i> পপুলার টেইলার্স এন্ড ফেব্রিক্স</h1>
+    <p>আধুনিক ডিজাইন ও নিখুঁত ফিটিং</p>
+</header>
+
+<div class="container">
+    
+    <div id="statsArea" style="display: none;" class="stats-row">
+        <div class="stat-card"><h3>🛒 মোট অর্ডার</h3><p id="totalOrders">০</p></div>
+        <div class="stat-card"><h3>👕 প্রোডাক্ট</h3><p id="totalProds">০</p></div>
+        <div class="stat-card"><h3>✅ সম্পন্ন</h3><p id="doneOrders">০</p></div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" id="btn-shop" onclick="showTab('shop')">কালেকশন</button>
+        <button class="tab-btn" id="btn-admin" onclick="showTab('admin')">ম্যানেজমেন্ট</button>
+    </div>
+
+    <div id="shop" class="content-section active">
+        <div class="product-grid" id="productDisplay"></div>
+    </div>
+
+    <div id="admin" class="content-section">
+        <div class="admin-card">
+            <h3>নতুন আইটেম যোগ করুন</h3>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="pName" placeholder="নাম">
+                <input type="number" id="pPrice" placeholder="মূল্য">
+            </div>
+            <input type="file" id="pImage" accept="image/*">
+            <button class="btn btn-admin" onclick="addProduct()">আপলোড করুন</button>
+        </div>
+        <br>
+        <div class="admin-card">
+            <h3>অর্ডার ট্র্যাকিং</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>কাস্টমার</th>
+                        <th>পণ্য</th>
+                        <th>তারিখ</th>
+                        <th>অ্যাকশন</th>
+                    </tr>
+                </thead>
+                <tbody id="adminOrderList"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="orderModal">
+    <div class="modal-body">
+        <h2 id="orderTitle">অর্ডার করুন</h2>
+        <input type="text" id="custName" placeholder="আপনার নাম">
+        <input type="text" id="custPhone" placeholder="মোবাইল নম্বর">
+        <textarea id="custMeasure" rows="4" placeholder="মাপের বিস্তারিত তথ্য লিখুন..."></textarea>
+        <button class="btn btn-order" onclick="submitOrder()"><i class="fab fa-whatsapp"></i> হোয়াটসঅ্যাপে কনফার্ম করুন</button>
+        <button onclick="closeOrder()" style="background:none; border:none; color:red; margin-top:15px; cursor:pointer; width:100%;">ফিরে যান</button>
+    </div>
+</div>
+
+<script>
+    const MY_PHONE = "8801327778717";
+    const SECRET_KEY = "Popular@Elite787"; // আরও কঠিন পাসওয়ার্ড
+
+    let products = JSON.parse(localStorage.getItem('elite_prods')) || [];
+    let orders = JSON.parse(localStorage.getItem('elite_orders')) || [];
+    let activeProduct = "";
+
+    function showTab(tabId) {
+        if(tabId === 'admin') {
+            let pass = prompt("অ্যাডমিন সিকিউরিটি কোড দিন:");
+            if(pass !== SECRET_KEY) { alert("এক্সেস ডিনাইড!"); return; }
+            document.getElementById('statsArea').style.display = 'grid';
+            updateStats();
+        } else {
+            document.getElementById('statsArea').style.display = 'none';
+        }
+        
+        document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        document.getElementById('btn-' + tabId).classList.add('active');
+        if(tabId === 'shop') renderProducts();
+        if(tabId === 'admin') renderAdminOrders();
+    }
+
+    function addProduct() {
+        const name = document.getElementById('pName').value;
+        const price = document.getElementById('pPrice').value;
+        const imgInput = document.getElementById('pImage').files[0];
+
+        if(name && price && imgInput) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                products.unshift({ id: Date.now(), name, price, image: e.target.result });
+                localStorage.setItem('elite_prods', JSON.stringify(products));
+                alert("সফলভাবে যোগ হয়েছে!");
+                renderProducts();
+                updateStats();
+            };
+            reader.readAsDataURL(imgInput);
+        }
+    }
+
+    function renderProducts() {
+        const display = document.getElementById('productDisplay');
+        display.innerHTML = "";
+        products.forEach(p => {
+            display.innerHTML += `
+                <div class="product-card">
+                    <img src="${p.image}" class="product-img">
+                    <div class="product-info">
+                        <h3>${p.name}</h3>
+                        <span class="price-tag">৳ ${p.price}</span>
+                        <button class="btn btn-order" onclick="openOrder('${p.name}')">অর্ডার দিন</button>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    function openOrder(name) {
+        activeProduct = name;
+        document.getElementById('orderTitle').innerText = name + " - এর মাপ দিন";
+        document.getElementById('orderModal').style.display = 'flex';
+    }
+
+    function closeOrder() { document.getElementById('orderModal').style.display = 'none'; }
+
+    function submitOrder() {
+        const name = document.getElementById('custName').value;
+        const phone = document.getElementById('custPhone').value;
+        const measure = document.getElementById('custMeasure').value;
+        const oid = "PT" + Math.floor(Math.random() * 9000);
+
+        if(name && phone) {
+            orders.unshift({ oid, name, phone, product: activeProduct, date: new Date().toLocaleDateString() });
+            localStorage.setItem('elite_orders', JSON.stringify(orders));
+            
+            let text = `*পপুলার টেইলার্স - নতুন অর্ডার*\nআইডি: ${oid}\nপণ্য: ${activeProduct}\nকাস্টমার: ${name}\nমাপ: ${measure}`;
+            window.open(`https://wa.me/${MY_PHONE}?text=${encodeURIComponent(text)}`);
+            closeOrder();
+        }
+    }
+
+    function renderAdminOrders() {
+        const list = document.getElementById('adminOrderList');
+        list.innerHTML = "";
+        orders.forEach((o, i) => {
+            list.innerHTML += `<tr><td>${o.oid}</td><td>${o.name}</td><td>${o.product}</td><td>${o.date}</td><td><button onclick="delOrder(${i})" style="color:red; border:none; background:none; cursor:pointer;"><i class="fas fa-trash"></i></button></td></tr>`;
+        });
+    }
+
+    function delOrder(i) { orders.splice(i, 1); localStorage.setItem('elite_orders', JSON.stringify(orders)); renderAdminOrders(); updateStats(); }
+
+    function updateStats() {
+        document.getElementById('totalOrders').innerText = orders.length;
+        document.getElementById('totalProds').innerText = products.length;
+    }
+
+    renderProducts();
+</script>
+</body>
+</html>
